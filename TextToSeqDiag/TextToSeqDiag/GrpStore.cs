@@ -41,7 +41,7 @@ namespace TextToSeqDiag
         public void UpdateOffsets()
         {
             var accumulator = 0.0;
-            foreach (var grp in _byIndex.Values)
+            foreach (var grp in _byIndex.Values.OrderBy(x => x.Index, Comparer<T>.Default))
             {
                 grp.Offset = accumulator;
                 accumulator += grp.Span;

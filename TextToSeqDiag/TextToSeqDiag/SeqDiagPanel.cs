@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -60,6 +61,7 @@ namespace TextToSeqDiag
             }
             _columns.UpdateOffsets();
             _rows.UpdateOffsets();
+
             foreach (var gap in _gaps)
             {
                 var gi = gap.Index;
