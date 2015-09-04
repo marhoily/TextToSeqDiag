@@ -68,6 +68,7 @@
     <Compile Include="SequenceDiagram.xaml.cs">
       <DependentUpon>SequenceDiagram.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SeqDiagPanelTests.cs" />
     <Compile Include="SequenceDiagramTests.cs" />
     <Compile Include="LightweigtTestsUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -89,6 +90,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SeqDiagPanelTests.Verify_One_Column.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_Message.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_One_Actor.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_Two_Actors.approved.png" />
