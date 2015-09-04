@@ -22,5 +22,13 @@ namespace TextToSeqDiag
             _view.AddActor("Server");
             _view.VerifySnapshot();
         }
+
+        [TestMethod]
+        public void Verify_Two_Actors()
+        {
+            _view.AddActor("Server");
+            _view.AddActor("Client");
+            _view.VerifySnapshot();
+        }
     }
 }

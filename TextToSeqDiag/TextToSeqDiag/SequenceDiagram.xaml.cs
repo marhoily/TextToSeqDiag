@@ -24,7 +24,8 @@ namespace TextToSeqDiag
                 Margin = new Thickness(5),
                 CornerRadius = new CornerRadius(3),
                 Padding = new Thickness(15, 2, 15, 2),
-                Child = new TextBlock { Text = name }
+                Child = new TextBlock { Text = name },
+                SnapsToDevicePixels = true,
             };
             Grid.SetColumn(header, LayoutRoot.ColumnDefinitions.Count - 1);
             LayoutRoot.Children.Add(header);
@@ -38,6 +39,7 @@ namespace TextToSeqDiag
                 X2 = 0,
                 Stroke = Brushes.Black,
                 Stretch = Stretch.Fill,
+                SnapsToDevicePixels = true,
             };
             Grid.SetColumn(line, LayoutRoot.ColumnDefinitions.Count - 1);
             Grid.SetRow(line, 1);
