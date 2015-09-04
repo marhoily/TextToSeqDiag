@@ -25,6 +25,7 @@ namespace TextToSeqDiag
         public void Update(double span)
         {
             Span = Math.Max(span, Span);
+            Span = Math.Round(Span/2)*2;
         }
     }
 }
