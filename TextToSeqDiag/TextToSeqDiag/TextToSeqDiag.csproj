@@ -63,6 +63,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Anchor.cs" />
+    <Compile Include="Arrow.cs" />
     <Compile Include="SequenceDiagram.xaml.cs">
       <DependentUpon>SequenceDiagram.xaml</DependentUpon>
     </Compile>
@@ -87,7 +89,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SequenceDiagramTests.Verify_Message.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_One_Actor.approved.png" />
+    <Content Include="SequenceDiagramTests.Verify_Two_Actors.approved.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

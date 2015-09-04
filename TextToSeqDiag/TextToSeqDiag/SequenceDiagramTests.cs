@@ -30,5 +30,14 @@ namespace TextToSeqDiag
             _view.AddActor("Client");
             _view.VerifySnapshot();
         }
+
+        [TestMethod]
+        public void Verify_Message()
+        {
+            _view.AddActor("Server");
+            _view.AddActor("Client");
+            _view.AddMessage(0, 1, "Hello!");
+            _view.VerifySnapshot();
+        }
     }
 }

@@ -14,8 +14,8 @@ namespace TextToSeqDiag
 
         public void AddActor(string name)
         {
-            LayoutRoot.ColumnDefinitions.Add(
-                new ColumnDefinition {Width = GridLength.Auto});
+            ObjectsLayer.ColumnDefinitions.Add(
+                new ColumnDefinition { Width = GridLength.Auto });
 
             var header = new Border
             {
@@ -27,8 +27,8 @@ namespace TextToSeqDiag
                 Child = new TextBlock { Text = name },
                 SnapsToDevicePixels = true,
             };
-            Grid.SetColumn(header, LayoutRoot.ColumnDefinitions.Count - 1);
-            LayoutRoot.Children.Add(header);
+            Grid.SetColumn(header, ObjectsLayer.ColumnDefinitions.Count - 1);
+            ObjectsLayer.Children.Add(header);
 
             var line = new Line
             {
@@ -41,10 +41,58 @@ namespace TextToSeqDiag
                 Stretch = Stretch.Fill,
                 SnapsToDevicePixels = true,
             };
-            Grid.SetColumn(line, LayoutRoot.ColumnDefinitions.Count - 1);
+            Grid.SetColumn(line, ObjectsLayer.ColumnDefinitions.Count - 1);
             Grid.SetRow(line, 1);
             Grid.SetRowSpan(line, 1000);
-            LayoutRoot.Children.Add(line);
+            ObjectsLayer.Children.Add(line);
+        }
+
+        public void AddMessage(int source, int destination, string message)
+        {
+            ObjectsLayer.RowDefinitions.Insert(1,
+                new RowDefinition { Height = GridLength.Auto });
+
+            var sourceAnchor = new Ellipse
+            {
+                Width = 5,
+                Height = 5,
+                Fill = Brushes.GreenYellow,
+                StrokeThickness = 1,
+                Stroke = Brushes.Black,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(10)
+            };
+            Grid.SetColumn(sourceAnchor, source);
+            Grid.SetRow(sourceAnchor, ObjectsLayer.RowDefinitions.Count - 2);
+            ObjectsLayer.Children.Add(sourceAnchor);
+
+            var destinationAnchor = new Ellipse
+            {
+                Width = 5,
+                Height = 5,
+                Fill = Brushes.GreenYellow,
+                StrokeThickness = 1,
+                Stroke = Brushes.Black,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(10)
+            };
+            Grid.SetColumn(destinationAnchor, destination);
+            Grid.SetRow(destinationAnchor, ObjectsLayer.RowDefinitions.Count - 2);
+            ObjectsLayer.Children.Add(destinationAnchor);
+
+            var arrow = new Arrow
+            {
+                HeadWidth = 10,
+                HeadHeight = 5 * 2 / 3.0,
+                Stroke = Brushes.Black,
+                StrokeThickness = 1
+            };
+
+            Anchor.SetSource(arrow, sourceAnchor);
+            Anchor.SetDestination(arrow, destinationAnchor);
+         //   ArrowsLayer.Children.Add(arrow);
         }
     }
 }
