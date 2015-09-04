@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace TextToSeqDiag
 {
     [TestClass]
-    [UseReporter(typeof(AraxisMergeReporter))]
+    [UseReporter(typeof (AraxisMergeReporter))]
     public class SeqDiagPanelTests
     {
         private SeqDiagPanel _view;
@@ -57,28 +57,30 @@ namespace TextToSeqDiag
 
         private static Border CreateOneColumnRect(int column, int row)
         {
-            var border = new Border
-            {
-                Margin = new Thickness(3),
-                BorderBrush = Brushes.Black,
-                BorderThickness = new Thickness(1),
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                Child = new TextBlock
+            return CreateRect(
+                string.Format("({0}, {1})", column, row),
+                new Position
                 {
-                    Text = string.Format("({0}, {1})", column, row),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                }
-            };
-            SeqDiagPanel.SetPosition(border, new Position
-            {
-                Column = column,
-                Row = row,
-                Kind = PositionKind.OneColumn,
-            });
-            return border;
+                    Column = column,
+                    Row = row,
+                    Kind = PositionKind.OneColumn
+                });
         }
+
         private static Border CreateMessageRect(int column, int column2, int row)
+        {
+            return CreateRect(
+                string.Format("({0} -> {1}, {2})", column, column2, row),
+                new Position
+                {
+                    Column = column,
+                    Column2 = column2,
+                    Row = row,
+                    Kind = PositionKind.Message
+                });
+        }
+
+        private static Border CreateRect(string format, Position position)
         {
             var border = new Border
             {
@@ -87,18 +89,12 @@ namespace TextToSeqDiag
                 BorderThickness = new Thickness(1),
                 Child = new TextBlock
                 {
-                    Text = string.Format("({0} -> {1}, {2})", column, column2, row),
+                    Text = format,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center
                 }
             };
-            SeqDiagPanel.SetPosition(border, new Position
-            {
-                Column = column,
-                Column2 = column2,
-                Row = row,
-                Kind = PositionKind.Message,
-            });
+            SeqDiagPanel.SetPosition(border, position);
             return border;
         }
     }
