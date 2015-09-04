@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SeqDiagPanelTests.Verify_One_Column.approved.png" />
+    <Content Include="SeqDiagPanelTests.Verify_Second_Row.approved.png" />
     <Content Include="SeqDiagPanelTests.Verify_Two_Columns.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_Message.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_One_Actor.approved.png" />
