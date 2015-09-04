@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,9 +10,15 @@ namespace TextToSeqDiag
         public static readonly DependencyProperty PositionProperty = DependencyProperty.RegisterAttached(
             "Position", typeof (Position), typeof (SeqDiagPanel), new PropertyMetadata(default(Position)));
 
-        private GrpStore<int> _columns;
-        private GrpStore<Tuple<int, int>> _gaps;
-        private GrpStore<int> _rows;
+        private readonly GrpStore<int> _columns = new GrpStore<int>(
+            c => c.Kind == PositionKind.OneColumn,
+            c => c.Column);
+
+        private readonly GrpStore<Tuple<int, int>> _gaps = new GrpStore<Tuple<int, int>>(
+            c => c.Kind == PositionKind.Message,
+            c => Tuple.Create(c.Column, c.Column2));
+
+        private readonly GrpStore<int> _rows = new GrpStore<int>(c => true, c => c.Row);
 
         public static void SetPosition(DependencyObject element, Position value)
         {
@@ -27,19 +32,9 @@ namespace TextToSeqDiag
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            _columns = new GrpStore<int>(
-                Children.OfType<UIElement>().Where(
-                    c => GetPosition(c).Kind == PositionKind.OneColumn),
-                c => GetPosition(c).Column);
-
-            _rows = new GrpStore<int>(
-                Children.OfType<UIElement>(),
-                c => GetPosition(c).Row);
-
-            _gaps = new GrpStore<Tuple<int, int>>(
-                Children.OfType<UIElement>().Where(
-                    c => GetPosition(c).Kind == PositionKind.Message),
-                c => Tuple.Create(GetPosition(c).Column, GetPosition(c).Column2));
+            _columns.Set(Children.OfType<UIElement>());
+            _rows.Set(Children.OfType<UIElement>());
+            _gaps.Set(Children.OfType<UIElement>());
 
             foreach (UIElement child in Children)
             {
@@ -52,10 +47,13 @@ namespace TextToSeqDiag
                         _columns[position.Column].Update(size.Width);
                         break;
                     case PositionKind.Message:
-                        var c1 = position.Column;
-                        var c2 = position.Column2;
-                        _gaps[Tuple.Create(c1, c2)].Update(size.Width);
+                        _gaps[Tuple.Create(position.Column, position.Column2)]
+                            .Update(size.Width);
                         break;
+                    case PositionKind.Body:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
                 _rows[position.Row].Update(size.Height);
             }
@@ -82,19 +80,16 @@ namespace TextToSeqDiag
                 switch (position.Kind)
                 {
                     case PositionKind.OneColumn:
-                        var topLeft = new Point(
-                            c1.Offset,
-                            _rows[position.Row].Offset);
-                        child.Arrange(new Rect(topLeft,
-                            new Size(c1.Span, child.DesiredSize.Height)));
+                        var topLeft = new Point(c1.Offset, _rows[position.Row].Offset);
+                        child.Arrange(new Rect(topLeft, new Size(c1.Span, child.DesiredSize.Height)));
                         break;
                     case PositionKind.Message:
                         var c2 = _columns[position.Column2];
-                        var left = c1.Midlle;
-                        var right = c2.Midlle;
-                        var topLeft2 = new Point(left, _rows[position.Row].Offset);
+                        var topLeft2 = new Point(c1.Midlle, _rows[position.Row].Offset);
                         child.Arrange(new Rect(topLeft2,
-                            new Size(right - left, child.DesiredSize.Height)));
+                            new Size(c2.Midlle - c1.Midlle, child.DesiredSize.Height)));
+                        break;
+                    case PositionKind.Body:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

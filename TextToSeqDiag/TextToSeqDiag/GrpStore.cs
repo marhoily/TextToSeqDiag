@@ -8,15 +8,26 @@ namespace TextToSeqDiag
 {
     internal sealed class GrpStore<T> : IEnumerable<Grp<T>>
     {
-        private readonly Dictionary<T, Grp<T>> _byIndex;
+        private readonly Func<Position, bool> _filter;
+        private readonly Func<Position, T> _getKey;
+        private Dictionary<T, Grp<T>> _byIndex;
 
-        public GrpStore(IEnumerable<UIElement> source, Func<UIElement, T> getKey)
+        public GrpStore(Func<Position, bool> filter, Func<Position, T> getKey)
+        {
+            _filter = filter;
+            _getKey = getKey;
+        }
+
+        public void Set(IEnumerable<UIElement> source)
         {
             _byIndex = source
-                .GroupBy(getKey)
+                .Where(x => _filter(SeqDiagPanel.GetPosition(x)))
+                .GroupBy(x => _getKey(SeqDiagPanel.GetPosition(x)))
                 .Select(group => new Grp<T>(group))
                 .ToDictionary(c => c.Index, c => c);
         }
+
+        public void Reset() { _byIndex = null; }
 
         public double TotalSpan
         {
