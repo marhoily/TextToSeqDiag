@@ -84,14 +84,6 @@ namespace TextToSeqDiag
                 .ToDictionary(c => c.ColumnIndex, c => c);
         }
 
-        private Dictionary<int, Row> GroupByRows()
-        {
-            return Children.OfType<UIElement>()
-                .GroupBy(c => GetPosition(c).Row)
-                // .OrderBy(group => group.Key)
-                .Select(group => new Row(group))
-                .ToDictionary(c => c.RowIndex, c => c);
-        }
         private Dictionary<Tuple<int, int>, Gap> GroupByGaps()
         {
             return Children.OfType<UIElement>()
@@ -178,25 +170,7 @@ namespace TextToSeqDiag
                 Width = Math.Max(width, Width);
             }
         }
-        private sealed class Row
-        {
-            public Row(IGrouping<int, UIElement> group)
-            {
-                Elements = group.ToArray();
-                RowIndex = group.Key;
-            }
 
-            public int RowIndex { get; private set; }
-
-            public UIElement[] Elements { get; private set; }
-            public double Height { get; private set; }
-            public double Top { get; set; }
-
-            public void Update(double height)
-            {
-                Height = Math.Max(height, Height);
-            }
-        }
     }
 
     sealed class Grp<T>
