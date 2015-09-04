@@ -65,21 +65,13 @@ namespace TextToSeqDiag
             foreach (var gap in _gaps)
             {
                 var gi = gap.Index;
-                var c1 = _columns[gi.Item1];
-                var c2 = _columns[gi.Item2];
-                var totalSpan = c2.Midlle - c1.Midlle;
-                if (totalSpan < gap.Span)
-                {
-                    var increment = (gap.Span - totalSpan)/(gi.Item2 - gi.Item1);
-                    foreach (var column in _columns)
-                        if (column.Index >= gi.Item1 && column.Index <= gi.Item2)
-                            column.Span += increment;
-                    _columns.UpdateOffsets();
-                }
+                var totalSpan = _columns[gi.Item2].Midlle - _columns[gi.Item1].Midlle;
+                if (!(totalSpan < gap.Span)) continue;
+                var increment = (gap.Span - totalSpan)/(gi.Item2 - gi.Item1);
+                _columns.IncrementRange(gi, increment);
             }
             return new Size(_columns.TotalSpan, _rows.TotalSpan);
         }
-
 
         protected override Size ArrangeOverride(Size finalSize)
         {

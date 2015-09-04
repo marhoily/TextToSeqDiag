@@ -47,5 +47,15 @@ namespace TextToSeqDiag
                 accumulator += grp.Span;
             }
         }
+
+        public void IncrementRange(Tuple<T, T> range, double increment)
+        {
+            var c = Comparer<T>.Default;
+            foreach (var grp in _byIndex.Values)
+                if (c.Compare(grp.Index, range.Item1) >= 0 
+                    && c.Compare(grp.Index, range.Item2) <= 0)
+                    grp.Span += increment;
+            UpdateOffsets();
+        }
     }
 }
