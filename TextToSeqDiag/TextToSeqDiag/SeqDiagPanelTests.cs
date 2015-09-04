@@ -55,6 +55,15 @@ namespace TextToSeqDiag
             _view.VerifySnapshot();
         }
 
+        [TestMethod]
+        public void Verify_Body_Rect()
+        {
+            _view.Children.Add(CreateOneColumnRect(0, 0));
+            _view.Children.Add(CreateOneColumnRect(0, 1));
+            _view.Children.Add(CreateBodyRect(1));
+            _view.VerifySnapshot();
+        }
+
         private static Border CreateOneColumnRect(int column, int row)
         {
             return CreateRect(
@@ -80,6 +89,17 @@ namespace TextToSeqDiag
                 });
         }
 
+        private static Border CreateBodyRect(int column)
+        {
+            return CreateRect(
+                string.Format("({0}, all)", column),
+                new Position
+                {
+                    Column = column,
+                    Kind = PositionKind.Body
+                });
+        }
+
         private static Border CreateRect(string format, Position position)
         {
             var border = new Border
@@ -87,6 +107,7 @@ namespace TextToSeqDiag
                 Margin = new Thickness(3),
                 BorderBrush = Brushes.Black,
                 BorderThickness = new Thickness(1),
+                VerticalAlignment = VerticalAlignment.Stretch,
                 Child = new TextBlock
                 {
                     Text = format,

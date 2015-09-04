@@ -95,6 +95,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SeqDiagPanelTests.Verify_Body_Rect.approved.png" />
     <Content Include="SeqDiagPanelTests.Verify_Message_Rect.approved.png" />
     <Content Include="SeqDiagPanelTests.Verify_One_Column.approved.png" />
     <Content Include="SeqDiagPanelTests.Verify_Second_Row.approved.png" />

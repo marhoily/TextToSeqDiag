@@ -11,7 +11,7 @@ namespace TextToSeqDiag
             "Position", typeof (Position), typeof (SeqDiagPanel), new PropertyMetadata(default(Position)));
 
         private readonly GrpStore<int> _columns = new GrpStore<int>(
-            c => c.Kind == PositionKind.OneColumn,
+            c => c.Kind == PositionKind.OneColumn || c.Kind == PositionKind.Body,
             c => c.Column);
 
         private readonly GrpStore<Tuple<int, int>> _gaps = new GrpStore<Tuple<int, int>>(
@@ -44,13 +44,12 @@ namespace TextToSeqDiag
                 switch (position.Kind)
                 {
                     case PositionKind.OneColumn:
+                    case PositionKind.Body:
                         _columns[position.Column].Update(size.Width);
                         break;
                     case PositionKind.Message:
                         _gaps[Tuple.Create(position.Column, position.Column2)]
                             .Update(size.Width);
-                        break;
-                    case PositionKind.Body:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -90,6 +89,9 @@ namespace TextToSeqDiag
                             new Size(c2.Midlle - c1.Midlle, child.DesiredSize.Height)));
                         break;
                     case PositionKind.Body:
+                        var topLeft3 = new Point(c1.Offset, 0);
+                        child.Arrange(new Rect(topLeft3, 
+                            new Size(c1.Span, finalSize.Height)));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
