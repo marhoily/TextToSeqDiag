@@ -17,7 +17,7 @@ namespace TextToSeqDiag
         }
 
         [TestMethod]
-        public void Verify_Square_Looks()
+        public void Verify_One_Actor()
         {
             _view.AddActor("Server");
             _view.VerifySnapshot();
