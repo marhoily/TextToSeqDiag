@@ -65,7 +65,10 @@
   <ItemGroup>
     <Compile Include="Anchor.cs" />
     <Compile Include="Arrow.cs" />
-    <Compile Include="SequenceDiagram.xaml.cs">
+    <Compile Include="Position.cs" />
+    <Compile Include="PositionKind.cs" />
+    <Compile Include="SeqDiagPanel.cs" />
+    <Compile Include="SequenceDiagram.cs">
       <DependentUpon>SequenceDiagram.xaml</DependentUpon>
     </Compile>
     <Compile Include="SeqDiagPanelTests.cs" />
