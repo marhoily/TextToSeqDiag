@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -29,6 +28,21 @@ namespace TextToSeqDiag
             };
             Grid.SetColumn(header, LayoutRoot.ColumnDefinitions.Count - 1);
             LayoutRoot.Children.Add(header);
+
+            var line = new Line
+            {
+                StrokeThickness = 1,
+                Y1 = 0,
+                Y2 = 1,
+                X1 = 0,
+                X2 = 0,
+                Stroke = Brushes.Black,
+                Stretch = Stretch.Fill,
+            };
+            Grid.SetColumn(line, LayoutRoot.ColumnDefinitions.Count - 1);
+            Grid.SetRow(line, 1);
+            Grid.SetRowSpan(line, 1000);
+            LayoutRoot.Children.Add(line);
         }
     }
 }
