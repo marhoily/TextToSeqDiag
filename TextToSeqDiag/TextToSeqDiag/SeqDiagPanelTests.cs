@@ -18,8 +18,6 @@ namespace TextToSeqDiag
         {
             _view = new SeqDiagPanel
             {
-                Width = 100,
-                Height = 100,
                 Background = Brushes.White
             };
         }
@@ -27,33 +25,38 @@ namespace TextToSeqDiag
         [TestMethod]
         public void Verify_One_Column()
         {
-            _view.Columns = 1;
-            _view.Children.Add(new Border
+            _view.Children.Add(CreateRect("1"));
+            _view.VerifySnapshot();
+        }
+
+        private static Border CreateRect(string text)
+        {
+            return new Border
             {
                 Margin = new Thickness(3),
                 BorderBrush = Brushes.Black,
                 BorderThickness = new Thickness(1),
                 Child = new TextBlock
                 {
-                    Text = "1",
+                    Text = text,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center
                 }
-            });
-            _view.VerifySnapshot();
+            };
         }
     }
 
     public sealed class SeqDiagPanel : Panel
     {
-        public int Columns { get; set; }
         protected override Size MeasureOverride(Size availableSize)
         {
+            var size = default(Size);
             foreach (UIElement child in Children)
             {
                 child.Measure(availableSize);
+                size = child.DesiredSize;
             }
-            return base.MeasureOverride(availableSize);
+            return size;
         }
 
         protected override Size ArrangeOverride(Size finalSize)
