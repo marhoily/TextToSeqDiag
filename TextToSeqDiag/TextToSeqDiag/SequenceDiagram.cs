@@ -7,6 +7,8 @@ namespace TextToSeqDiag
 {
     public partial class SequenceDiagram
     {
+        private int _column;
+
         public SequenceDiagram()
         {
             InitializeComponent();
@@ -14,10 +16,6 @@ namespace TextToSeqDiag
 
         public void AddActor(string name)
         {
-            AddColumn(Headers);
-            AddColumn(Bars);
-            AddColumn(Bodies);
-
             var header = new Border
             {
                 BorderBrush = Brushes.Black,
@@ -28,8 +26,13 @@ namespace TextToSeqDiag
                 Child = new TextBlock { Text = name },
                 SnapsToDevicePixels = true,
             };
-            Grid.SetColumn(header, Headers.ColumnDefinitions.Count - 1);
-            Headers.Children.Add(header);
+            SeqDiagPanel.SetPosition(header, new Position
+            {
+                Column = _column,
+                Kind = PositionKind.OneColumn,
+                Row = 0,
+            });
+            LayoutRoot.Children.Add(header);
 
             var line = new Line
             {
@@ -41,13 +44,18 @@ namespace TextToSeqDiag
                 Stroke = Brushes.Black,
                 Stretch = Stretch.Fill,
                 SnapsToDevicePixels = true,
-                HorizontalAlignment = HorizontalAlignment.Stretch
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
             };
-            Grid.SetColumn(line, Headers.ColumnDefinitions.Count - 1);
-            Grid.SetRow(line, 1);
-            Bars.Children.Add(line);
+            SeqDiagPanel.SetPosition(line, new Position
+            {
+                Column = _column,
+                Kind = PositionKind.Body,
+            });
+            LayoutRoot.Children.Add(line);
+            _column++;
         }
-
+/*
         private static void AddColumn(Grid headers)
         {
             headers.ColumnDefinitions.Add(
@@ -103,6 +111,6 @@ namespace TextToSeqDiag
 
             Anchor.SetSource(arrow, sourceAnchor);
             Anchor.SetDestination(arrow, destinationAnchor);
-        }
+        }*/
     }
 }
