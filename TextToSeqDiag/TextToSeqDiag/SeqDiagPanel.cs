@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -109,73 +107,6 @@ namespace TextToSeqDiag
                 }
             }
             return base.ArrangeOverride(finalSize);
-        }
-    }
-
-    internal sealed class Grp<T>
-    {
-        public Grp(IGrouping<T, UIElement> group)
-        {
-            Elements = group.ToArray();
-            Index = group.Key;
-        }
-
-        public T Index { get; private set; }
-        public UIElement[] Elements { get; private set; }
-        public double Span { get; set; }
-        public double Offset { get; set; }
-
-        public double Midlle
-        {
-            get { return Offset + Span/2; }
-        }
-
-        public void Update(double span)
-        {
-            Span = Math.Max(span, Span);
-        }
-    }
-
-    internal sealed class GrpStore<T> : IEnumerable<Grp<T>>
-    {
-        private readonly Dictionary<T, Grp<T>> _byIndex;
-
-        public GrpStore(IEnumerable<UIElement> source, Func<UIElement, T> getKey)
-        {
-            _byIndex = source
-                .GroupBy(getKey)
-                .Select(group => new Grp<T>(group))
-                .ToDictionary(c => c.Index, c => c);
-        }
-
-        public double TotalSpan
-        {
-            get { return _byIndex.Values.Sum(c => c.Span); }
-        }
-
-        public Grp<T> this[T index]
-        {
-            get { return _byIndex[index]; }
-        }
-
-        public IEnumerator<Grp<T>> GetEnumerator()
-        {
-            return _byIndex.Values.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public void UpdateOffsets()
-        {
-            var accumulator = 0.0;
-            foreach (var grp in _byIndex.Values)
-            {
-                grp.Offset = accumulator;
-                accumulator += grp.Span;
-            }
         }
     }
 }

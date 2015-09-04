@@ -65,6 +65,8 @@
   <ItemGroup>
     <Compile Include="Anchor.cs" />
     <Compile Include="Arrow.cs" />
+    <Compile Include="Grp.cs" />
+    <Compile Include="GrpStore.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="PositionKind.cs" />
     <Compile Include="SeqDiagPanel.cs" />
