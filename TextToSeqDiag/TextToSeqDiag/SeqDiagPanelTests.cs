@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace TextToSeqDiag
 {
     [TestClass]
-    [UseReporter(typeof (AraxisMergeReporter))]
+    [UseReporter(typeof(AraxisMergeReporter))]
     public class SeqDiagPanelTests
     {
         private SeqDiagPanel _view;
@@ -27,29 +27,38 @@ namespace TextToSeqDiag
         [TestMethod]
         public void Verify_One_Column()
         {
-            _view.Children.Add(CreateRect(0, 0));
+            _view.Children.Add(CreateOneColumnRect(0, 0));
             _view.VerifySnapshot();
         }
 
         [TestMethod]
         public void Verify_Two_Columns()
         {
-            _view.Children.Add(CreateRect(0, 0));
-            _view.Children.Add(CreateRect(1, 0));
+            _view.Children.Add(CreateOneColumnRect(0, 0));
+            _view.Children.Add(CreateOneColumnRect(1, 0));
             _view.VerifySnapshot();
         }
 
         [TestMethod]
         public void Verify_Second_Row()
         {
-            _view.Children.Add(CreateRect(0, 0));
-            _view.Children.Add(CreateRect(1, 0));
-            _view.Children.Add(CreateRect(0, 1));
-            _view.Children.Add(CreateRect(1, 1));
+            _view.Children.Add(CreateOneColumnRect(0, 0));
+            _view.Children.Add(CreateOneColumnRect(1, 0));
+            _view.Children.Add(CreateOneColumnRect(0, 1));
+            _view.Children.Add(CreateOneColumnRect(1, 1));
             _view.VerifySnapshot();
         }
 
-        private static Border CreateRect(int column, int row)
+        [TestMethod]
+        public void Verify_Message_Rect()
+        {
+            _view.Children.Add(CreateOneColumnRect(0, 0));
+            _view.Children.Add(CreateOneColumnRect(1, 0));
+            _view.Children.Add(CreateMessageRect(0, 1, 1));
+            _view.VerifySnapshot();
+        }
+
+        private static Border CreateOneColumnRect(int column, int row)
         {
             var border = new Border
             {
@@ -65,26 +74,58 @@ namespace TextToSeqDiag
             };
             SeqDiagPanel.SetPosition(border, new Position
             {
-                Column = column, 
+                Column = column,
                 Row = row,
+                Kind = PositionKind.OneColumn,
+            });
+            return border;
+        }
+        private static Border CreateMessageRect(int column, int column2, int row)
+        {
+            var border = new Border
+            {
+                Margin = new Thickness(3),
+                BorderBrush = Brushes.Black,
+                BorderThickness = new Thickness(1),
+                Child = new TextBlock
+                {
+                    Text = string.Format("({0} -> {1}, {2})", column, column2, row),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                }
+            };
+            SeqDiagPanel.SetPosition(border, new Position
+            {
+                Column = column,
+                Column2 = column2,
+                Row = row,
+                Kind = PositionKind.Message,
             });
             return border;
         }
     }
 
+    public enum PositionKind
+    {
+        OneColumn,
+        Message,
+    }
     public sealed class Position
     {
+        public PositionKind Kind { get; set; }
         public int Column { get; set; }
+        public int Column2 { get; set; }
         public int Row { get; set; }
     }
 
     public sealed class SeqDiagPanel : Panel
     {
         public static readonly DependencyProperty PositionProperty = DependencyProperty.RegisterAttached(
-            "Position", typeof (Position), typeof (SeqDiagPanel), new PropertyMetadata(default(Position)));
+            "Position", typeof(Position), typeof(SeqDiagPanel), new PropertyMetadata(default(Position)));
 
         private Dictionary<int, Column> _columns;
         private Dictionary<int, Row> _rows;
+        private Dictionary<Tuple<int, int>, Gap> _gaps;
 
         public static void SetPosition(DependencyObject element, Position value)
         {
@@ -93,20 +134,49 @@ namespace TextToSeqDiag
 
         public static Position GetPosition(DependencyObject element)
         {
-            return (Position) element.GetValue(PositionProperty);
+            return (Position)element.GetValue(PositionProperty);
         }
 
         protected override Size MeasureOverride(Size availableSize)
         {
             _columns = GroupByColumns();
             _rows = GroupByRows();
+            _gaps = GroupByGaps();
 
             foreach (UIElement child in Children)
             {
                 child.Measure(availableSize);
                 var size = child.DesiredSize;
-                _columns[GetPosition(child).Column].Update(size.Width);
-                _rows[GetPosition(child).Row].Update(size.Height);
+                var position = GetPosition(child);
+                switch (position.Kind)
+                {
+                    case PositionKind.OneColumn:
+                        _columns[position.Column].Update(size.Width);
+                        break;
+                    case PositionKind.Message:
+                        var c1 = position.Column;
+                        var c2 = position.Column2;
+                        _gaps[Tuple.Create(c1, c2)].Update(size.Width);
+                        break;
+                }
+                _rows[position.Row].Update(size.Height);
+            }
+            UpdateColumnOffsets();
+            UpdateRowOffsets();
+            foreach (var gap in _gaps.Values)
+            {
+                var gi = gap.GapIndex;
+                var c1 = _columns[gi.Item1];
+                var c2 = _columns[gi.Item2];
+                var totalSpan = c2.Left + c2.Width/2 - (c1.Left + c1.Width/2);
+                if (totalSpan < gap.Width)
+                {
+                    var increment = (gap.Width - totalSpan)/(gi.Item2 - gi.Item1);
+                    foreach (var column in _columns)
+                        if (column.Key >= gi.Item1 && column.Key <= gi.Item2)
+                            column.Value.Width += increment;
+                    UpdateColumnOffsets();
+                }
             }
             return new Size(
                 _columns.Values.Sum(c => c.Width),
@@ -116,8 +186,9 @@ namespace TextToSeqDiag
         private Dictionary<int, Column> GroupByColumns()
         {
             return Children.OfType<UIElement>()
+                .Where(c => GetPosition(c).Kind == PositionKind.OneColumn)
                 .GroupBy(c => GetPosition(c).Column)
-                .OrderBy(group => group.Key)
+               // .OrderBy(group => group.Key)
                 .Select(group => new Column(group))
                 .ToDictionary(c => c.ColumnIndex, c => c);
         }
@@ -126,22 +197,46 @@ namespace TextToSeqDiag
         {
             return Children.OfType<UIElement>()
                 .GroupBy(c => GetPosition(c).Row)
-                .OrderBy(group => group.Key)
+               // .OrderBy(group => group.Key)
                 .Select(group => new Row(group))
                 .ToDictionary(c => c.RowIndex, c => c);
+        }
+        private Dictionary<Tuple<int, int>, Gap> GroupByGaps()
+        {
+            return Children.OfType<UIElement>()
+                .Where(c => GetPosition(c).Kind == PositionKind.Message)
+                .GroupBy(c => Tuple.Create(GetPosition(c).Column, GetPosition(c).Column2))
+                .Select(group => new Gap(group))
+                .ToDictionary(c => c.GapIndex, c => c);
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            UpdateColumnOffsets();
-            UpdateRowOffsets();
+
             foreach (UIElement child in Children)
             {
                 var position = GetPosition(child);
-                var topLeft = new Point(
-                    _columns[position.Column].Left,
-                    _rows[position.Row].Top);
-                child.Arrange(new Rect(topLeft, child.DesiredSize));
+                var c1 = _columns[position.Column];
+                switch (position.Kind)
+                {
+                    case PositionKind.OneColumn:
+                        var topLeft = new Point(
+                            c1.Left,
+                            _rows[position.Row].Top);
+                        child.Arrange(new Rect(topLeft, 
+                            new Size(c1.Width, child.DesiredSize.Height)));
+                        break;
+                    case PositionKind.Message:
+                        var c2 = _columns[position.Column2];
+                        var left = c1.Left + c1.Width / 2;
+                        var right = c2.Left + c2.Width / 2;
+                        var topLeft2 = new Point(left, _rows[position.Row].Top);
+                        child.Arrange(new Rect(topLeft2,
+                            new Size(right - left, child.DesiredSize.Height)));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
             return base.ArrangeOverride(finalSize);
         }
@@ -155,6 +250,7 @@ namespace TextToSeqDiag
                 accumulator += column.Width;
             }
         }
+
         private void UpdateRowOffsets()
         {
             var accumulator = 0.0;
@@ -176,7 +272,7 @@ namespace TextToSeqDiag
             public int ColumnIndex { get; private set; }
 
             public UIElement[] Elements { get; private set; }
-            public double Width { get; private set; }
+            public double Width { get; set; }
             public double Left { get; set; }
 
             public void Update(double width)
@@ -185,6 +281,21 @@ namespace TextToSeqDiag
             }
         }
 
+        private sealed class Gap
+        {
+            public Tuple<int, int> GapIndex { get; private set; }
+            public Gap(IGrouping<Tuple<int, int>, UIElement> @group)
+            {
+                GapIndex = group.Key;
+            }
+
+            public double Width { get; private set; }
+
+            public void Update(double width)
+            {
+                Width = Math.Max(width, Width);
+            }
+        }
         private sealed class Row
         {
             public Row(IGrouping<int, UIElement> group)
