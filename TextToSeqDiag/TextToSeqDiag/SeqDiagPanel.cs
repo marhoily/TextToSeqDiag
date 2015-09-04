@@ -12,7 +12,7 @@ namespace TextToSeqDiag
             "Position", typeof(Position), typeof(SeqDiagPanel), new PropertyMetadata(default(Position)));
 
         private Dictionary<int, Column> _columns;
-        private Dictionary<int, Row> _rows;
+        private GrpStore<int> _rows;
         private Dictionary<Tuple<int, int>, Gap> _gaps;
 
         public static void SetPosition(DependencyObject element, Position value)
@@ -28,7 +28,10 @@ namespace TextToSeqDiag
         protected override Size MeasureOverride(Size availableSize)
         {
             _columns = GroupByColumns();
-            _rows = GroupByRows();
+            _rows = new GrpStore<int>(
+                Children.OfType<UIElement>(),
+                c => GetPosition(c).Row);
+
             _gaps = GroupByGaps();
 
             foreach (UIElement child in Children)
@@ -50,7 +53,7 @@ namespace TextToSeqDiag
                 _rows[position.Row].Update(size.Height);
             }
             UpdateColumnOffsets();
-            UpdateRowOffsets();
+            _rows.UpdateOffsets();
             foreach (var gap in _gaps.Values)
             {
                 var gi = gap.GapIndex;
@@ -68,7 +71,7 @@ namespace TextToSeqDiag
             }
             return new Size(
                 _columns.Values.Sum(c => c.Width),
-                _rows.Values.Sum(c => c.Height));
+                _rows.TotalSpan);
         }
 
         private Dictionary<int, Column> GroupByColumns()
@@ -110,7 +113,7 @@ namespace TextToSeqDiag
                     case PositionKind.OneColumn:
                         var topLeft = new Point(
                             c1.Left,
-                            _rows[position.Row].Top);
+                            _rows[position.Row].Offset);
                         child.Arrange(new Rect(topLeft,
                             new Size(c1.Width, child.DesiredSize.Height)));
                         break;
@@ -118,7 +121,7 @@ namespace TextToSeqDiag
                         var c2 = _columns[position.Column2];
                         var left = c1.Left + c1.Width / 2;
                         var right = c2.Left + c2.Width / 2;
-                        var topLeft2 = new Point(left, _rows[position.Row].Top);
+                        var topLeft2 = new Point(left, _rows[position.Row].Offset);
                         child.Arrange(new Rect(topLeft2,
                             new Size(right - left, child.DesiredSize.Height)));
                         break;
@@ -139,15 +142,6 @@ namespace TextToSeqDiag
             }
         }
 
-        private void UpdateRowOffsets()
-        {
-            var accumulator = 0.0;
-            foreach (var row in _rows.Values)
-            {
-                row.Top = accumulator;
-                accumulator += row.Height;
-            }
-        }
 
         private sealed class Column
         {
@@ -202,6 +196,55 @@ namespace TextToSeqDiag
             {
                 Height = Math.Max(height, Height);
             }
+        }
+    }
+
+    sealed class Grp<T>
+    {
+        public Grp(IGrouping<T, UIElement> group)
+        {
+            Elements = group.ToArray();
+            Index = group.Key;
+        }
+
+        public T Index { get; private set; }
+        public UIElement[] Elements { get; private set; }
+        public double Span { get; private set; }
+        public double Offset { get; set; }
+
+        public void Update(double span)
+        {
+            Span = Math.Max(span, Span);
+        }
+    }
+
+    sealed class GrpStore<T>
+    {
+        private readonly Dictionary<T, Grp<T>> _byIndex;
+
+        public double TotalSpan { get { return _byIndex.Values.Sum(c => c.Span); }}
+
+        public GrpStore(IEnumerable<UIElement> source, Func<UIElement, T> getKey)
+        {
+            _byIndex = source
+                .GroupBy(getKey)
+                .Select(group => new Grp<T>(group))
+                .ToDictionary(c => c.Index, c => c);
+        }
+
+        public void UpdateOffsets()
+        {
+            var accumulator = 0.0;
+            foreach (var grp in _byIndex.Values)
+            {
+                grp.Offset = accumulator;
+                accumulator += grp.Span;
+            }
+        }
+
+        public Grp<T> this[T index]
+        {
+            get { return _byIndex[index]; }
         }
     }
 }
