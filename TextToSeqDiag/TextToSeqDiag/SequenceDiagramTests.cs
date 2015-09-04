@@ -27,7 +27,7 @@ namespace TextToSeqDiag
         public void Verify_Two_Actors()
         {
             _view.AddActor("Server");
-            _view.AddActor("Client");
+            _view.AddActor("C");
             _view.VerifySnapshot();
         }
 

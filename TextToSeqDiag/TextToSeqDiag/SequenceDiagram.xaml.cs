@@ -14,8 +14,9 @@ namespace TextToSeqDiag
 
         public void AddActor(string name)
         {
-            ObjectsLayer.ColumnDefinitions.Add(
-                new ColumnDefinition { Width = GridLength.Auto });
+            AddColumn(Headers);
+            AddColumn(Bars);
+            AddColumn(Bodies);
 
             var header = new Border
             {
@@ -27,8 +28,8 @@ namespace TextToSeqDiag
                 Child = new TextBlock { Text = name },
                 SnapsToDevicePixels = true,
             };
-            Grid.SetColumn(header, ObjectsLayer.ColumnDefinitions.Count - 1);
-            ObjectsLayer.Children.Add(header);
+            Grid.SetColumn(header, Headers.ColumnDefinitions.Count - 1);
+            Headers.Children.Add(header);
 
             var line = new Line
             {
@@ -40,16 +41,26 @@ namespace TextToSeqDiag
                 Stroke = Brushes.Black,
                 Stretch = Stretch.Fill,
                 SnapsToDevicePixels = true,
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
-            Grid.SetColumn(line, ObjectsLayer.ColumnDefinitions.Count - 1);
+            Grid.SetColumn(line, Headers.ColumnDefinitions.Count - 1);
             Grid.SetRow(line, 1);
-            Grid.SetRowSpan(line, 1000);
-            ObjectsLayer.Children.Add(line);
+            Bars.Children.Add(line);
+        }
+
+        private static void AddColumn(Grid headers)
+        {
+            headers.ColumnDefinitions.Add(
+                new ColumnDefinition
+                {
+                    Width = GridLength.Auto,
+                    SharedSizeGroup = "b" + headers.ColumnDefinitions.Count
+                });
         }
 
         public void AddMessage(int source, int destination, string message)
         {
-            ObjectsLayer.RowDefinitions.Insert(1,
+            Bodies.RowDefinitions.Add(
                 new RowDefinition { Height = GridLength.Auto });
 
             var sourceAnchor = new Ellipse
@@ -64,8 +75,8 @@ namespace TextToSeqDiag
                 Margin = new Thickness(10)
             };
             Grid.SetColumn(sourceAnchor, source);
-            Grid.SetRow(sourceAnchor, ObjectsLayer.RowDefinitions.Count - 2);
-            ObjectsLayer.Children.Add(sourceAnchor);
+            Grid.SetRow(sourceAnchor, Bodies.RowDefinitions.Count - 1);
+            Bodies.Children.Add(sourceAnchor);
 
             var destinationAnchor = new Ellipse
             {
@@ -79,8 +90,8 @@ namespace TextToSeqDiag
                 Margin = new Thickness(10)
             };
             Grid.SetColumn(destinationAnchor, destination);
-            Grid.SetRow(destinationAnchor, ObjectsLayer.RowDefinitions.Count - 2);
-            ObjectsLayer.Children.Add(destinationAnchor);
+            Grid.SetRow(destinationAnchor, Bodies.RowDefinitions.Count - 1);
+            Bodies.Children.Add(destinationAnchor);
 
             var arrow = new Arrow
             {
@@ -92,7 +103,6 @@ namespace TextToSeqDiag
 
             Anchor.SetSource(arrow, sourceAnchor);
             Anchor.SetDestination(arrow, destinationAnchor);
-         //   ArrowsLayer.Children.Add(arrow);
         }
     }
 }

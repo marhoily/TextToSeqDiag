@@ -5,13 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <Grid x:Name="ObjectsLayer">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition MinHeight="50" Height="Auto"/>
-            </Grid.RowDefinitions>
-        </Grid>
-        <Canvas x:Name="ArrowsLayer"/>
+    <Grid IsSharedSizeScope="True" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition MinHeight="50" Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" x:Name="Headers"/>
+        <Grid Grid.Row="1" x:Name="Bars"/>
+        <Grid Grid.Row="1" x:Name="Bodies"/>
     </Grid>
 </UserControl>
