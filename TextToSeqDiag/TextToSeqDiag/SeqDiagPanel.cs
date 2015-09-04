@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace TextToSeqDiag
 {
@@ -11,7 +13,7 @@ namespace TextToSeqDiag
         public static readonly DependencyProperty PositionProperty = DependencyProperty.RegisterAttached(
             "Position", typeof(Position), typeof(SeqDiagPanel), new PropertyMetadata(default(Position)));
 
-        private Dictionary<int, Column> _columns;
+        private GrpStore<int> _columns;
         private GrpStore<int> _rows;
         private Dictionary<Tuple<int, int>, Gap> _gaps;
 
@@ -27,7 +29,11 @@ namespace TextToSeqDiag
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            _columns = GroupByColumns();
+            _columns = new GrpStore<int>(
+                Children.OfType<UIElement>().Where(
+                    c => GetPosition(c).Kind == PositionKind.OneColumn),
+                c => GetPosition(c).Column);
+
             _rows = new GrpStore<int>(
                 Children.OfType<UIElement>(),
                 c => GetPosition(c).Row);
@@ -52,38 +58,27 @@ namespace TextToSeqDiag
                 }
                 _rows[position.Row].Update(size.Height);
             }
-            UpdateColumnOffsets();
+            _columns.UpdateOffsets();
             _rows.UpdateOffsets();
             foreach (var gap in _gaps.Values)
             {
                 var gi = gap.GapIndex;
                 var c1 = _columns[gi.Item1];
                 var c2 = _columns[gi.Item2];
-                var totalSpan = c2.Left + c2.Width / 2 - (c1.Left + c1.Width / 2);
+                var totalSpan = c2.Midlle - c1.Midlle;
                 if (totalSpan < gap.Width)
                 {
                     var increment = (gap.Width - totalSpan) / (gi.Item2 - gi.Item1);
                     foreach (var column in _columns)
-                        if (column.Key >= gi.Item1 && column.Key <= gi.Item2)
-                            column.Value.Width += increment;
-                    UpdateColumnOffsets();
+                        if (column.Index >= gi.Item1 && column.Index <= gi.Item2)
+                            column.Span += increment;
+                    _columns.UpdateOffsets();
                 }
             }
-            return new Size(
-                _columns.Values.Sum(c => c.Width),
-                _rows.TotalSpan);
+            return new Size(_columns.TotalSpan, _rows.TotalSpan);
         }
 
-        private Dictionary<int, Column> GroupByColumns()
-        {
-            return Children.OfType<UIElement>()
-                .Where(c => GetPosition(c).Kind == PositionKind.OneColumn)
-                .GroupBy(c => GetPosition(c).Column)
-                // .OrderBy(group => group.Key)
-                .Select(group => new Column(group))
-                .ToDictionary(c => c.ColumnIndex, c => c);
-        }
-
+     
         private Dictionary<Tuple<int, int>, Gap> GroupByGaps()
         {
             return Children.OfType<UIElement>()
@@ -104,15 +99,15 @@ namespace TextToSeqDiag
                 {
                     case PositionKind.OneColumn:
                         var topLeft = new Point(
-                            c1.Left,
+                            c1.Offset,
                             _rows[position.Row].Offset);
                         child.Arrange(new Rect(topLeft,
-                            new Size(c1.Width, child.DesiredSize.Height)));
+                            new Size(c1.Span, child.DesiredSize.Height)));
                         break;
                     case PositionKind.Message:
                         var c2 = _columns[position.Column2];
-                        var left = c1.Left + c1.Width / 2;
-                        var right = c2.Left + c2.Width / 2;
+                        var left = c1.Midlle;
+                        var right = c2.Midlle;
                         var topLeft2 = new Point(left, _rows[position.Row].Offset);
                         child.Arrange(new Rect(topLeft2,
                             new Size(right - left, child.DesiredSize.Height)));
@@ -124,36 +119,6 @@ namespace TextToSeqDiag
             return base.ArrangeOverride(finalSize);
         }
 
-        private void UpdateColumnOffsets()
-        {
-            var accumulator = 0.0;
-            foreach (var column in _columns.Values)
-            {
-                column.Left = accumulator;
-                accumulator += column.Width;
-            }
-        }
-
-
-        private sealed class Column
-        {
-            public Column(IGrouping<int, UIElement> group)
-            {
-                Elements = group.ToArray();
-                ColumnIndex = group.Key;
-            }
-
-            public int ColumnIndex { get; private set; }
-
-            public UIElement[] Elements { get; private set; }
-            public double Width { get; set; }
-            public double Left { get; set; }
-
-            public void Update(double width)
-            {
-                Width = Math.Max(width, Width);
-            }
-        }
 
         private sealed class Gap
         {
@@ -183,8 +148,9 @@ namespace TextToSeqDiag
 
         public T Index { get; private set; }
         public UIElement[] Elements { get; private set; }
-        public double Span { get; private set; }
+        public double Span { get; set; }
         public double Offset { get; set; }
+        public double Midlle { get { return Offset + Span/2; } }
 
         public void Update(double span)
         {
@@ -192,7 +158,7 @@ namespace TextToSeqDiag
         }
     }
 
-    sealed class GrpStore<T>
+    sealed class GrpStore<T> : IEnumerable<Grp<T>>
     {
         private readonly Dictionary<T, Grp<T>> _byIndex;
 
@@ -219,6 +185,16 @@ namespace TextToSeqDiag
         public Grp<T> this[T index]
         {
             get { return _byIndex[index]; }
+        }
+
+        public IEnumerator<Grp<T>> GetEnumerator()
+        {
+            return _byIndex.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
