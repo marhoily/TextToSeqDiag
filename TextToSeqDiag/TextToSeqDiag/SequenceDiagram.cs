@@ -38,14 +38,13 @@ namespace TextToSeqDiag
             {
                 StrokeThickness = 1,
                 Y1 = 0,
-                Y2 = 1,
+                Y2 = 75,
                 X1 = 0,
                 X2 = 0,
+                MinHeight = 75,
                 Stroke = Brushes.Black,
                 Stretch = Stretch.Fill,
                 SnapsToDevicePixels = true,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
             };
             SeqDiagPanel.SetPosition(line, new Position
             {
