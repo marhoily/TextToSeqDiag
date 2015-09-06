@@ -26,9 +26,9 @@ namespace TextToSeqDiag
         [TestMethod]
         public void Verify_Two_Actors()
         {
-          /*  _view.AddActor("Server");
+            _view.AddActor("Server");
             _view.AddActor("C");
-            _view.VerifySnapshot();*/
+            _view.VerifySnapshot();
         }
 
         [TestMethod]
