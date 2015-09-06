@@ -1,98 +1,65 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace TextToSeqDiag
 {
-    public sealed class ArrowElement : UserControl
-    {
-        private readonly Arrow _arrow;
-        private double _ceiling;
-
-        public ArrowElement()
-        {
-            _arrow = new Arrow
-            {
-                SnapsToDevicePixels = true,
-                HeadWidth = 10,
-                HeadHeight = 5 * 2 / 3.0,
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
-            _ceiling = Math.Ceiling(_arrow.HeadHeight);
-            Content = _arrow;
-        }
-
-        protected override Size MeasureOverride(Size constraint)
-        {
-            return new Size(0, _ceiling * 2);
-            //return base.MeasureOverride(constraint);
-        }
-
-        protected override Size ArrangeOverride(Size arrangeBounds)
-        {
-            _arrow.X2 = arrangeBounds.Width;
-            _arrow.Y1 = _arrow.Y2 = _ceiling;
-            return base.ArrangeOverride(arrangeBounds);
-        }
-    }
     public sealed class Arrow : Shape
     {
         #region Dependency Properties
 
-        public static readonly DependencyProperty X1Property = DependencyProperty.Register("X1", typeof(double), typeof(Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty Y1Property = DependencyProperty.Register("Y1", typeof(double), typeof(Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty X2Property = DependencyProperty.Register("X2", typeof(double), typeof(Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty Y2Property = DependencyProperty.Register("Y2", typeof(double), typeof(Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty HeadWidthProperty = DependencyProperty.Register("HeadWidth", typeof(double), typeof(Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty HeadHeightProperty = DependencyProperty.Register("HeadHeight", typeof(double), typeof(Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly DependencyProperty X1Property = DependencyProperty.Register("X1", typeof (double), typeof (Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly DependencyProperty Y1Property = DependencyProperty.Register("Y1", typeof (double), typeof (Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly DependencyProperty X2Property = DependencyProperty.Register("X2", typeof (double), typeof (Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly DependencyProperty Y2Property = DependencyProperty.Register("Y2", typeof (double), typeof (Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly DependencyProperty HeadWidthProperty = DependencyProperty.Register("HeadWidth", typeof (double), typeof (Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly DependencyProperty HeadHeightProperty = DependencyProperty.Register("HeadHeight", typeof (double), typeof (Arrow), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
 
         #endregion
 
         #region CLR Properties
 
-        [TypeConverter(typeof(LengthConverter))]
+        [TypeConverter(typeof (LengthConverter))]
         public double X1
         {
-            get { return (double)base.GetValue(X1Property); }
+            get { return (double) base.GetValue(X1Property); }
             set { base.SetValue(X1Property, value); }
         }
 
-        [TypeConverter(typeof(LengthConverter))]
+        [TypeConverter(typeof (LengthConverter))]
         public double Y1
         {
-            get { return (double)base.GetValue(Y1Property); }
+            get { return (double) base.GetValue(Y1Property); }
             set { base.SetValue(Y1Property, value); }
         }
 
-        [TypeConverter(typeof(LengthConverter))]
+        [TypeConverter(typeof (LengthConverter))]
         public double X2
         {
-            get { return (double)base.GetValue(X2Property); }
+            get { return (double) base.GetValue(X2Property); }
             set { base.SetValue(X2Property, value); }
         }
 
-        [TypeConverter(typeof(LengthConverter))]
+        [TypeConverter(typeof (LengthConverter))]
         public double Y2
         {
-            get { return (double)base.GetValue(Y2Property); }
+            get { return (double) base.GetValue(Y2Property); }
             set { base.SetValue(Y2Property, value); }
         }
 
-        [TypeConverter(typeof(LengthConverter))]
+        [TypeConverter(typeof (LengthConverter))]
         public double HeadWidth
         {
-            get { return (double)base.GetValue(HeadWidthProperty); }
+            get { return (double) base.GetValue(HeadWidthProperty); }
             set { base.SetValue(HeadWidthProperty, value); }
         }
 
-        [TypeConverter(typeof(LengthConverter))]
+        [TypeConverter(typeof (LengthConverter))]
         public double HeadHeight
         {
-            get { return (double)base.GetValue(HeadHeightProperty); }
+            get { return (double) base.GetValue(HeadHeightProperty); }
             set { base.SetValue(HeadHeightProperty, value); }
         }
 
@@ -133,13 +100,9 @@ namespace TextToSeqDiag
             Point pt1 = new Point(X1, this.Y1);
             Point pt2 = new Point(X2, this.Y2);
 
-            Point pt3 = new Point(
-                X2 + (HeadWidth * cost - HeadHeight * sint),
-                Y2 + (HeadWidth * sint + HeadHeight * cost));
+            Point pt3 = new Point(X2 + (HeadWidth*cost - HeadHeight*sint), Y2 + (HeadWidth*sint + HeadHeight*cost));
 
-            Point pt4 = new Point(
-                X2 + (HeadWidth * cost + HeadHeight * sint),
-                Y2 - (HeadHeight * cost - HeadWidth * sint));
+            Point pt4 = new Point(X2 + (HeadWidth*cost + HeadHeight*sint), Y2 - (HeadHeight*cost - HeadWidth*sint));
 
             context.BeginFigure(pt1, true, false);
             context.LineTo(pt2, true, true);
@@ -150,5 +113,4 @@ namespace TextToSeqDiag
 
         #endregion
     }
-
 }

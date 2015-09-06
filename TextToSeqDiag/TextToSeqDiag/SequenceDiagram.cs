@@ -50,8 +50,16 @@ namespace TextToSeqDiag
         public void AddMessage(int source, int destination, string message)
         {
             _row++;
+            var direction = MessageDirection.LeftToRight;
+            if (source > destination)
+            {
+                var tmp = source;
+                source = destination;
+                destination = tmp;
+                direction = MessageDirection.RightToLeft;
+            }
 
-            var arrowElement = new ArrowElement();
+            var arrowElement = new ArrowElement { Direction = direction };
             Grid.SetRow(arrowElement, 2);
             var grid = new Grid
             {
