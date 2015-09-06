@@ -58,16 +58,37 @@ namespace TextToSeqDiag
         public void AddMessage(int source, int destination, string message)
         {
             _row++;
-            var arrow = new ArrowElement { Margin = new Thickness(0, 5,0,5)};
 
-            SeqDiagPanel.SetPosition(arrow, new Position
+            var arrowElement = new ArrowElement();
+            Grid.SetRow(arrowElement, 2);
+            var grid = new Grid
+            {
+                RowDefinitions =
+                {
+                    new RowDefinition {Height = GridLength.Auto},
+                    new RowDefinition {Height = GridLength.Auto},
+                },
+
+                Children =
+                {
+                    new TextBlock
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0,0,0,-2),
+                        Text = message,
+                    },
+                    arrowElement
+                }
+            };
+
+            SeqDiagPanel.SetPosition(grid, new Position
             {
                 Column = source,
                 Column2 = destination,
                 Row = _row,
                 Kind = PositionKind.Message,
             });
-            LayoutRoot.Children.Add(arrow);
+            LayoutRoot.Children.Add(grid);
 
         }
     }
