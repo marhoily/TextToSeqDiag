@@ -58,5 +58,17 @@ namespace TextToSeqDiag
             _view.AddMessage(1, 0, "Hello!");
             _view.VerifySnapshot();
         }
+
+        [TestMethod]
+        public void Verify_Messages_Vertical_Compactification()
+        {
+            _view.AddActor("Curstomer");
+            _view.AddActor("Server");
+            _view.AddActor("Employee");
+            _view.AddMessage(0, 1, "Hello!");
+            _view.AddMessage(1, 2, "Hello!");
+            _view.AddMessage(2, 0, "Bye!");
+            _view.VerifySnapshot();
+        }
     }
 }

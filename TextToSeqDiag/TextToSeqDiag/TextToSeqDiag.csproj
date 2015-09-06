@@ -103,6 +103,7 @@
     <Content Include="SeqDiagPanelTests.Verify_Second_Row.approved.png" />
     <Content Include="SeqDiagPanelTests.Verify_Two_Columns.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_Message.approved.png" />
+    <Content Include="SequenceDiagramTests.Verify_Messages_Vertical_Compactification.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_Message_That_Goes_Through_Column.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_Message_To_The_Left.approved.png" />
     <Content Include="SequenceDiagramTests.Verify_One_Actor.approved.png" />

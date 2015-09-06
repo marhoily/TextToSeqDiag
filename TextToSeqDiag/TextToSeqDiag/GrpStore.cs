@@ -33,6 +33,7 @@ namespace TextToSeqDiag
         {
             get { return _byIndex.Values.Sum(c => c.Span); }
         }
+       // public T MaxIndex { get { return _byIndex.Keys.Max(); } }
 
         public Grp<T> this[T index]
         {
@@ -41,7 +42,9 @@ namespace TextToSeqDiag
 
         public IEnumerator<Grp<T>> GetEnumerator()
         {
-            return _byIndex.Values.GetEnumerator();
+            return _byIndex.Values
+                .OrderBy(x => x.Index, Comparer<T>.Default)
+                .GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -52,7 +55,7 @@ namespace TextToSeqDiag
         public void UpdateOffsets()
         {
             var accumulator = 0.0;
-            foreach (var grp in _byIndex.Values.OrderBy(x => x.Index, Comparer<T>.Default))
+            foreach (var grp in this)
             {
                 grp.Offset = accumulator;
                 accumulator += grp.Span;
@@ -62,7 +65,7 @@ namespace TextToSeqDiag
         public void IncrementRange(Tuple<T, T> range, double increment)
         {
             var c = Comparer<T>.Default;
-            foreach (var grp in _byIndex.Values)
+            foreach (var grp in this)
                 if (c.Compare(grp.Index, range.Item1) >= 0 
                     && c.Compare(grp.Index, range.Item2) <= 0)
                     grp.Span += increment;

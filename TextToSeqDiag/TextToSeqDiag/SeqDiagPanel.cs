@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,15 +43,20 @@ namespace TextToSeqDiag
                 if (position.Kind == PositionKind.Body) continue;
                 child.Measure(availableSize);
                 var size = child.DesiredSize;
+                var intersections = _rows[position.Row].Intersections;
                 switch (position.Kind)
                 {
                     case PositionKind.OneColumn:
                     case PositionKind.Body:
                         _columns[position.Column].Update(size.Width);
+                        intersections.Add(position.Column*2);
+                        intersections.Add(position.Column*2+1);
                         break;
                     case PositionKind.Message:
                         _gaps[Tuple.Create(position.Column, position.Column2)]
                             .Update(size.Width);
+                        for (var i = position.Column*2+1; i < position.Column2*2; i++)
+                            intersections.Add(i);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -84,8 +90,51 @@ namespace TextToSeqDiag
                 var increment = (gap.Span - totalSpan) / (gi.Item2 - gi.Item1);
                 _columns.IncrementRange(gi, increment);
             }
+            CompactifyRows();
             return new Size(_columns.TotalSpan, Math.Max(
                 _rows.RowSpanOrDefault(0) + bodyHeight, _rows.TotalSpan));
+        }
+
+        private void CompactifyRows()
+        {
+            var groups = GetCompactGroups();
+            var offset = 0.0;
+            var fullOffset = 0.0;
+            foreach (var g in groups)
+            {
+                foreach (var row in g)
+                {
+                    row.Offset = offset;
+                    offset += 10;
+                    fullOffset = row.Offset + row.Span;
+                }
+                offset = fullOffset;
+            }
+        }
+
+        private List<List<Grp<int>>> GetCompactGroups()
+        {
+            var touchedRows = new HashSet<int>();
+            var currentGroup = new List<Grp<int>>();
+            var groups = new List<List<Grp<int>>>();
+            foreach (var row in _rows)
+            {
+                if (row.Intersections.All(touchedRows.Add))
+                {
+                    currentGroup.Add(row);
+                }
+                else
+                {
+                    groups.Add(currentGroup);
+                    currentGroup = new List<Grp<int>> { row };
+                    touchedRows = new HashSet<int>(row.Intersections);
+                }
+            }
+            if (currentGroup.Count > 0)
+            {
+                groups.Add(currentGroup);
+            }
+            return groups;
         }
 
         protected override Size ArrangeOverride(Size finalSize)

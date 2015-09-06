@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
@@ -10,12 +11,14 @@ namespace TextToSeqDiag
         {
             Elements = group.ToArray();
             Index = group.Key;
+            Intersections = new HashSet<int>();
         }
 
         public T Index { get; private set; }
         public UIElement[] Elements { get; private set; }
         public double Span { get; set; }
         public double Offset { get; set; }
+        public HashSet<int> Intersections { get; private set; }
 
         public double Midlle
         {
