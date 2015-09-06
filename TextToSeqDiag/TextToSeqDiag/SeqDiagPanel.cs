@@ -39,23 +39,38 @@ namespace TextToSeqDiag
             foreach (UIElement child in Children)
             {
                 var position = GetPosition(child);
-                if (position.Kind != PositionKind.Body)
-                    MeasureChild(availableSize, child, position);
+                if (position.Kind == PositionKind.Body) continue;
+                child.Measure(availableSize);
+                var size = child.DesiredSize;
+                switch (position.Kind)
+                {
+                    case PositionKind.OneColumn:
+                    case PositionKind.Body:
+                        _columns[position.Column].Update(size.Width);
+                        break;
+                    case PositionKind.Message:
+                        _gaps[Tuple.Create(position.Column, position.Column2)]
+                            .Update(size.Width);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                _rows[position.Row].Update(size.Height);
             }
             _rows.UpdateOffsets();
             foreach (UIElement child in Children)
             {
                 var position = GetPosition(child);
                 if (position.Kind != PositionKind.Body) continue;
-                var availableHeight = _rows.TotalSpan;
+                var availableHeight = 0.0;
                 var frameworkElement = child as FrameworkElement;
                 if (frameworkElement != null)
                 {
-                    availableHeight = Math.Max(frameworkElement.MinHeight, availableHeight);
+                    availableHeight = Math.Max(frameworkElement.MinHeight, _rows.TotalSpan);
                 }
-                bodyHeight = Math.Max(bodyHeight, availableHeight);
                 child.Measure(new Size(availableSize.Width, availableHeight));
                 var size = child.DesiredSize;
+                bodyHeight = Math.Max(bodyHeight, size.Height);
 
                 _columns[position.Column].Update(size.Width);
             }
@@ -69,27 +84,8 @@ namespace TextToSeqDiag
                 var increment = (gap.Span - totalSpan) / (gi.Item2 - gi.Item1);
                 _columns.IncrementRange(gi, increment);
             }
-            return new Size(_columns.TotalSpan, Math.Max(bodyHeight, _rows.TotalSpan));
-        }
-
-        private void MeasureChild(Size availableSize, UIElement child, Position position)
-        {
-            child.Measure(availableSize);
-            var size = child.DesiredSize;
-            switch (position.Kind)
-            {
-                case PositionKind.OneColumn:
-                case PositionKind.Body:
-                    _columns[position.Column].Update(size.Width);
-                    break;
-                case PositionKind.Message:
-                    _gaps[Tuple.Create(position.Column, position.Column2)]
-                        .Update(size.Width);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            _rows[position.Row].Update(size.Height);
+            return new Size(_columns.TotalSpan, Math.Max(
+                _rows.RowSpanOrDefault(0) + bodyHeight, _rows.TotalSpan));
         }
 
         protected override Size ArrangeOverride(Size finalSize)
@@ -111,9 +107,9 @@ namespace TextToSeqDiag
                             new Size(c2.Midlle - c1.Midlle, child.DesiredSize.Height)));
                         break;
                     case PositionKind.Body:
-                        var topLeft3 = new Point(c1.Offset, 0);
+                        var topLeft3 = new Point(c1.Offset, _rows.RowSpanOrDefault(0));
                         child.Arrange(new Rect(topLeft3,
-                            new Size(c1.Span, finalSize.Height)));
+                            new Size(c1.Span, child.DesiredSize.Height)));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

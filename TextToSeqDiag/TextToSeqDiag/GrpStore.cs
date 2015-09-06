@@ -68,5 +68,11 @@ namespace TextToSeqDiag
                     grp.Span += increment;
             UpdateOffsets();
         }
+
+        public double RowSpanOrDefault(T index)
+        {
+            Grp<T> value;
+            return _byIndex.TryGetValue(index, out value) ? value.Span : 0.0;
+        }
     }
 }
