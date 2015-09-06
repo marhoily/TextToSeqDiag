@@ -8,6 +8,7 @@ namespace TextToSeqDiag
     public partial class SequenceDiagram
     {
         private int _column;
+        private int _row;
 
         public SequenceDiagram()
         {
@@ -54,62 +55,20 @@ namespace TextToSeqDiag
             LayoutRoot.Children.Add(line);
             _column++;
         }
-/*
-        private static void AddColumn(Grid headers)
-        {
-            headers.ColumnDefinitions.Add(
-                new ColumnDefinition
-                {
-                    Width = GridLength.Auto,
-                    SharedSizeGroup = "b" + headers.ColumnDefinitions.Count
-                });
-        }
-
         public void AddMessage(int source, int destination, string message)
         {
-            Bodies.RowDefinitions.Add(
-                new RowDefinition { Height = GridLength.Auto });
+            _row++;
+            var arrow = new ArrowElement { Margin = new Thickness(0, 5,0,5)};
 
-            var sourceAnchor = new Ellipse
+            SeqDiagPanel.SetPosition(arrow, new Position
             {
-                Width = 5,
-                Height = 5,
-                Fill = Brushes.GreenYellow,
-                StrokeThickness = 1,
-                Stroke = Brushes.Black,
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(10)
-            };
-            Grid.SetColumn(sourceAnchor, source);
-            Grid.SetRow(sourceAnchor, Bodies.RowDefinitions.Count - 1);
-            Bodies.Children.Add(sourceAnchor);
+                Column = source,
+                Column2 = destination,
+                Row = _row,
+                Kind = PositionKind.Message,
+            });
+            LayoutRoot.Children.Add(arrow);
 
-            var destinationAnchor = new Ellipse
-            {
-                Width = 5,
-                Height = 5,
-                Fill = Brushes.GreenYellow,
-                StrokeThickness = 1,
-                Stroke = Brushes.Black,
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(10)
-            };
-            Grid.SetColumn(destinationAnchor, destination);
-            Grid.SetRow(destinationAnchor, Bodies.RowDefinitions.Count - 1);
-            Bodies.Children.Add(destinationAnchor);
-
-            var arrow = new Arrow
-            {
-                HeadWidth = 10,
-                HeadHeight = 5 * 2 / 3.0,
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
-
-            Anchor.SetSource(arrow, sourceAnchor);
-            Anchor.SetDestination(arrow, destinationAnchor);
-        }*/
+        }
     }
 }

@@ -1,11 +1,44 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace TextToSeqDiag
 {
+    public sealed class ArrowElement : UserControl
+    {
+        private readonly Arrow _arrow;
+        private double _ceiling;
+
+        public ArrowElement()
+        {
+            _arrow = new Arrow
+            {
+                SnapsToDevicePixels = true,
+                HeadWidth = 10,
+                HeadHeight = 5 * 2 / 3.0,
+                Stroke = Brushes.Black,
+                StrokeThickness = 1
+            };
+            _ceiling = Math.Ceiling(_arrow.HeadHeight);
+            Content = _arrow;
+        }
+
+        protected override Size MeasureOverride(Size constraint)
+        {
+            return new Size(0, _ceiling * 2);
+            //return base.MeasureOverride(constraint);
+        }
+
+        protected override Size ArrangeOverride(Size arrangeBounds)
+        {
+            _arrow.X2 = arrangeBounds.Width;
+            _arrow.Y1 = _arrow.Y2 = _ceiling;
+            return base.ArrangeOverride(arrangeBounds);
+        }
+    }
     public sealed class Arrow : Shape
     {
         #region Dependency Properties
