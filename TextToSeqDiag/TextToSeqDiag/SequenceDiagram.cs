@@ -27,12 +27,8 @@ namespace TextToSeqDiag
                 Child = new TextBlock { Text = name },
                 SnapsToDevicePixels = true,
             };
-            SeqDiagPanel.SetPosition(header, new Position
-            {
-                Column = _column,
-                Kind = PositionKind.OneColumn,
-                Row = 0,
-            });
+            SeqDiagPanel.SetPosition(header, 
+                Position.OneColumn(_column, 0));
             LayoutRoot.Children.Add(header);
 
             var line = new Line
@@ -47,11 +43,7 @@ namespace TextToSeqDiag
                 Stretch = Stretch.Fill,
                 SnapsToDevicePixels = true,
             };
-            SeqDiagPanel.SetPosition(line, new Position
-            {
-                Column = _column,
-                Kind = PositionKind.Body,
-            });
+            SeqDiagPanel.SetPosition(line, Position.Body(_column));
             LayoutRoot.Children.Add(line);
             _column++;
         }
@@ -76,18 +68,14 @@ namespace TextToSeqDiag
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(0,0,0,-2),
                         Text = message,
+                        Background = Brushes.White,
                     },
                     arrowElement
                 }
             };
 
-            SeqDiagPanel.SetPosition(grid, new Position
-            {
-                Column = source,
-                Column2 = destination,
-                Row = _row,
-                Kind = PositionKind.Message,
-            });
+            SeqDiagPanel.SetPosition(grid,
+                Position.Message(source, destination, _row));
             LayoutRoot.Children.Add(grid);
 
         }

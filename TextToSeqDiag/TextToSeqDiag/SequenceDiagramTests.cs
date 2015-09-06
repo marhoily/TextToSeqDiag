@@ -39,5 +39,24 @@ namespace TextToSeqDiag
             _view.AddMessage(0, 1, "Hello!");
             _view.VerifySnapshot();
         }
+
+        [TestMethod]
+        public void Verify_Message_That_Goes_Through_Column()
+        {
+            _view.AddActor("Server");
+            _view.AddActor("X");
+            _view.AddActor("Client");
+            _view.AddMessage(0, 2, "Hello!");
+            _view.VerifySnapshot();
+        }
+
+        [TestMethod]
+        public void Verify_Message_To_The_Left()
+        {
+            _view.AddActor("Server");
+            _view.AddActor("Client");
+            _view.AddMessage(1, 0, "Hello!");
+            _view.VerifySnapshot();
+        }
     }
 }

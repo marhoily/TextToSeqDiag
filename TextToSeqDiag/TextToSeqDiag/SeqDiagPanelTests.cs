@@ -68,36 +68,21 @@ namespace TextToSeqDiag
         {
             return CreateRect(
                 string.Format("({0}, {1})", column, row),
-                new Position
-                {
-                    Column = column,
-                    Row = row,
-                    Kind = PositionKind.OneColumn
-                });
+                Position.OneColumn(column, row));
         }
 
         private static Border CreateMessageRect(int column, int column2, int row)
         {
             return CreateRect(
                 string.Format("({0} -> {1}, {2})", column, column2, row),
-                new Position
-                {
-                    Column = column,
-                    Column2 = column2,
-                    Row = row,
-                    Kind = PositionKind.Message
-                });
+                Position.Message(column, column2, row));
         }
 
         private static Border CreateBodyRect(int column)
         {
             return CreateRect(
                 string.Format("({0}, all)", column),
-                new Position
-                {
-                    Column = column,
-                    Kind = PositionKind.Body
-                });
+                Position.Body(column));
         }
 
         private static Border CreateRect(string format, Position position)
