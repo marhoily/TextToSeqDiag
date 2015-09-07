@@ -83,6 +83,7 @@
     <Compile Include="VisualTreeHelperExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".travis.yml" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
