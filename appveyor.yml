@@ -19,6 +19,10 @@ cache:
 after_test:
   - 7z a received.zip %APPVEYOR_BUILD_FOLDER%\**\*.received.*
 
+on_failure:
+  - 7z a received.zip %APPVEYOR_BUILD_FOLDER%\**\*.received.*
+  - ps: $root = Resolve-Path .\TestLog; [IO.Directory]::GetFiles($root.Path, '*.*', 'AllDirectories') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName to-publish }
+
 artifacts:
   - path: received.zip
     name: received
