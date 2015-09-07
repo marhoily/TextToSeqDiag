@@ -16,6 +16,13 @@ before_build:
 cache:
   - packages -> **\packages.config
 
+after_test:
+  - 7z a received.zip %APPVEYOR_BUILD_FOLDER%\**\*.received.*
+
+artifacts:
+  - path: received.zip
+    name: received
+
 #after_test:
 #  - nuget pack AsyncEnumerable\AsyncEnumerable.nuspec -Version "%APPVEYOR_BUILD_VERSION%"
 
