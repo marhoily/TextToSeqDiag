@@ -44,7 +44,7 @@ namespace TextToSeqDiag
             }
             renderTarget.Render(drawingVisual);
 
-            var bytes = new byte[renderTarget.PixelWidth * renderTarget.PixelHeight * 4];
+        /*    var bytes = new byte[renderTarget.PixelWidth * renderTarget.PixelHeight * 4];
             renderTarget.CopyPixels(bytes, renderTarget.PixelWidth * 4, 0);
 
             for (var i = 0; i < bytes.Length; i++)
@@ -56,10 +56,10 @@ namespace TextToSeqDiag
                 renderTarget.PixelHeight,
                 96, 96, PixelFormats.Pbgra32,
                 BitmapPalettes.BlackAndWhite,
-                bytes, renderTarget.PixelWidth * 4);
+                bytes, renderTarget.PixelWidth * 4);*/
 
             var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(rendered));
+            encoder.Frames.Add(BitmapFrame.Create(renderTarget));
 
             using (var outputStream = new MemoryStream())
             {
