@@ -48,14 +48,14 @@ namespace TextToSeqDiag
             renderTarget.CopyPixels(bytes, renderTarget.PixelWidth * 4, 0);
 
             for (var i = 0; i < bytes.Length; i++)
-             //   if (i % 4 != 3)
-                bytes[i] = (byte) (bytes[i] & 0xf0);
+                if (i % 4 != 3)
+                    bytes[i] = (byte)(bytes[i] & 0x70);
 
             var rendered = BitmapSource.Create(
                 renderTarget.PixelWidth,
                 renderTarget.PixelHeight,
-                96, 96, PixelFormats.Pbgra32, 
-                BitmapPalettes.BlackAndWhite, 
+                96, 96, PixelFormats.Pbgra32,
+                BitmapPalettes.BlackAndWhite,
                 bytes, renderTarget.PixelWidth * 4);
 
             var encoder = new PngBitmapEncoder();
@@ -67,7 +67,7 @@ namespace TextToSeqDiag
                 return outputStream.ToArray();
             }
         }
-     
+
         public static byte[] TakeSnapshot(this UIElement source)
         {
             if (source.Hook()) return source.GetJpgImage(2);
