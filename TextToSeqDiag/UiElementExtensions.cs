@@ -24,11 +24,11 @@ namespace TextToSeqDiag
             var actualHeight = source.RenderSize.Height;
             var actualWidth = source.RenderSize.Width;
 
-            var renderHeight = actualHeight*scale;
-            var renderWidth = actualWidth*scale;
+            var renderHeight = actualHeight * scale;
+            var renderWidth = actualWidth * scale;
 
             var renderTarget = new RenderTargetBitmap(
-                (int) renderWidth, (int) renderHeight,
+                (int)renderWidth, (int)renderHeight,
                 96, 96, PixelFormats.Pbgra32);
             var sourceBrush = new VisualBrush(source);
 
@@ -44,8 +44,22 @@ namespace TextToSeqDiag
             }
             renderTarget.Render(drawingVisual);
 
+            var bytes = new byte[renderTarget.PixelWidth * renderTarget.PixelHeight * 4];
+            renderTarget.CopyPixels(bytes, renderTarget.PixelWidth * 4, 0);
+
+            for (var i = 0; i < bytes.Length; i++)
+             //   if (i % 4 != 3)
+                bytes[i] = (byte) (bytes[i] & 0xf0);
+
+            var rendered = BitmapSource.Create(
+                renderTarget.PixelWidth,
+                renderTarget.PixelHeight,
+                96, 96, PixelFormats.Pbgra32, 
+                BitmapPalettes.BlackAndWhite, 
+                bytes, renderTarget.PixelWidth * 4);
+
             var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(renderTarget));
+            encoder.Frames.Add(BitmapFrame.Create(rendered));
 
             using (var outputStream = new MemoryStream())
             {
@@ -53,7 +67,7 @@ namespace TextToSeqDiag
                 return outputStream.ToArray();
             }
         }
-
+     
         public static byte[] TakeSnapshot(this UIElement source)
         {
             if (source.Hook()) return source.GetJpgImage(2);
@@ -111,9 +125,9 @@ namespace TextToSeqDiag
 
         public static void Press(this Button btn)
         {
-            const BindingFlags bindingFlags = 
-                BindingFlags.Instance | 
-                BindingFlags.NonPublic | 
+            const BindingFlags bindingFlags =
+                BindingFlags.Instance |
+                BindingFlags.NonPublic |
                 BindingFlags.InvokeMethod;
             btn.GetType().InvokeMember("OnClick", bindingFlags, null, btn, null);
         }
